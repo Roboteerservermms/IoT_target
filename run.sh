@@ -1,5 +1,6 @@
 chmod 775 /sys/class/gpio/export
 chmod 775 /sys/class/gpio/unexport
+git pull
 for gpio in "65" "68" "70" "71" "72" "73" "74" "76"; do
     GPIO_DIR=$(ls /sys/class/gpio/ | grep ${gpio})
     if [ -n "$GPIO_DIR" ]; then
