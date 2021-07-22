@@ -1,9 +1,28 @@
 #-*- coding:utf-8 -*-
 import paho.mqtt.client as mqtt
 from gtts import gTTS
-from playsound import playsound
+import threading
 #-*- coding:utf-8 -*-
-import paho.mqtt.client as mqtt
+import vlc
+import time
+
+def play_media(args):
+	instance = vlc.Instance()
+
+	#Create a MediaPlayer with the default instance
+	player = instance.media_player_new()
+
+	#Load the media file
+	media = instance.media_new('{}'.format(args))
+
+	#Add the media to the player
+	player.set_media(media)
+
+	#Play for 10 seconds then exit
+	player.play()
+	time.sleep(5)
+
+
 
 broker_server = ""
 recvData = ""
@@ -18,9 +37,9 @@ def on_message(client, userdata, msg):
 	recvData = str(msg.payload.decode("utf-8"))
 	print(recvData) #토픽과 메세지를 출력한다.
 	tts = gTTS(text=recvData, lang="ko", slow=False)
-	tts.save("helloEN.mp3")
-	playsound("hellowEN.mp3")
-
+	fileName="helloEN.mp3"
+	tts.save(fileName)
+	play_media(fileName)
 client.on_connect = on_connect #콜백설정
 client.on_message = on_message #콜백설정
 
