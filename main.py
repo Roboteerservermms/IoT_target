@@ -8,13 +8,11 @@ import time
 
 def play_media(args):
 	instance = vlc.Instance()
-
 	#Create a MediaPlayer with the default instance
 	player = instance.media_player_new()
-
+	player.set_fullscreen(True)
 	#Load the media file
 	media = instance.media_new('{}'.format(args))
-
 	#Add the media to the player
 	player.set_media(media)
 

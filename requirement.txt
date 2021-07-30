@@ -1,0 +1,4 @@
+paho-mqtt
+gTTS
+playsound
+python-vlc
