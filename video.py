@@ -14,7 +14,7 @@ class VlcPlayer:
         else:
             self.media = vlc.MediaPlayer()
  
-    def set_uri(self, mrl):
+    def set_url(self, mrl):
         '''
         스트리밍 url주소 또는 로컬 재생파일을 설정
         :param mrl: 스트리밍주소
@@ -29,7 +29,7 @@ class VlcPlayer:
         :return: 성공:0, 실패:-1
         '''
         if path:
-            self.set_uri(path)
+            self.set_url(path)
             return self.media.play()
         else:
             return self.media.play()
