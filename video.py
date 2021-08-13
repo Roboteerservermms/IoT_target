@@ -1,115 +1,80 @@
 import vlc
-'''
-vlc event signal
-MediaPlayerNothingSpecial: vlc is idle, just waiting to issue a command
-MediaPlayerOpening: vlc is opening the media resource locator (MRL)
-MediaPlayerBuffering (int cache): vlc is buffering
-MediaPlayerPlaying: vlc is playing media
-MediaPlayerPaused: vlc is paused
-MediaPlayerStopped: vlc is in a stopped state
-MediaPlayerForward: vlc fast forward through media (this will never be called)
-MediaPlayerBackward: vlc is rewinding (this will never be called)
-MediaPlayerEncounteredError: vlc encountered an error and cannot continue
-MediaPlayerEndReached: vlc has reached the end of the current playlist
-MediaPlayerTimeChanged: Time has changed
-MediaPlayerPositionChanged: The progress has changed
-MediaPlayerSeekableChanged: Whether the searchable state of the streaming media has changed (true means searchable, false means not searchable)
-MediaPlayerPausableChanged: Whether the media can be paused or not (true means it can be paused, false means it cannot be paused)
-MediaPlayerMediaChanged: The media has changed
-MediaPlayerTitleChanged: The title has changed (DVD/Blu-ray)
-MediaPlayerChapterChanged: Chapter changed (DVD/Blu-ray)
-MediaPlayerLengthChanged: (Only for Mozilla in vlc version <2.2.0) length has changed
-MediaPlayerVout: The number of video outputs has changed
-MediaPlayerMuted: Mute
-MediaPlayerUnmuted: Unmute
-MediaPlayerAudioVolume: The volume has changed
-''' 
-def onEnd(event):
-    global doTrashCode
-    if event.type == vlc.EventType.MediaPlayerEndReached:
-        doTrashCode = True
-
+ 
+ 
 class VlcPlayer:
     '''
     args: VLC인스턴스 생성옵션
     '''
     
     def __init__(self, *args):
-        global instance
-        instance = vlc.Instance(*args)
-        self.medialist = instance.media_list_new()
-        self.medialistplayer = instance.media_list_player_new()
-        self.medialistplayer.set_playback_mode(vlc.PlaybackMode.loop)
-        self.mediaplayer = instance.media_player_new()
-        self.mediaplayer.set_fullscreen(True)
-
-    def add_media(self, mrl):
+        if args:
+            self.instance = vlc.Instance(*args)
+            self.media = self.instance.media_player_new()
+            self.media.set_fullscreen(True)
+        else:
+            self.media = vlc.MediaPlayer()
+ 
+    def set_uri(self, mrl):
         '''
         스트리밍 url주소 또는 로컬 재생파일을 설정
         :param mrl: 스트리밍주소
         :return:
         '''
-        new_media = instance.media_new(mrl)
-        self.medialist.add_media(new_media)
-        self.medialistplayer.set_media_list(self.media_list)
-        return self.medialist.count
-
-    def find_item(self, item):
-        new_media = instance.media_new(item)
-        return self.medialist.index_of_item(item)
-
-    def play(self, index=None):
+        self.media.set_mrl(mrl)
+ 
+    def play(self, path=None):
         '''
         미디어 재생
         :param path:
         :return: 성공:0, 실패:-1
         '''
-        if index:
-            return self.medialistplayer.play_item_at_index(index)
+        if path:
+            self.set_uri(path)
+            return self.media.play()
         else:
-            return self.medialistplayer.play()
-
+            return self.media.play()
+ 
     def pause(self):
         '''
         재생 멈춤
         :return:
         '''
-        self.medialistplayer.pause()
+        self.media.pause()
  
     def resume(self):
         '''
         재생 다시 시작
         :return:
         '''
-        self.medialistplayer.set_pause(0)
+        self.media.set_pause(0)
  
     def stop(self):
         '''
         재생 멈춤
         :return:
         '''
-        self.medialistplayer.stop()
+        self.media.stop()
  
     def release(self):
         '''
         미디어 소스 초기화
         :return:
         '''
-        return self.medialistplayer.release()
+        return self.media.release()
  
     def is_playing(self):
         '''
         플레이 상태 확인
         :return: 재생중 : 1, 재생중이지 않음 : 0
         '''
-        return self.medialistplayer.is_playing()
+        return self.media.is_playing()
  
     def get_time(self):
         '''
         Elapsed time, return millisecond value
         :return:
         '''
-        return self.mediaplayer.get_time()
+        return self.media.get_time()
  
     def set_time(self, ms):
         '''
@@ -117,7 +82,7 @@ class VlcPlayer:
         :param ms:
         :return: 성공 : 0, 실패 : -1
         '''
-        return self.mediaplayer.get_time(ms)
+        return self.media.get_time(ms)
  
     # The total length of audio and video, returns the value in milliseconds
     def get_length(self):
@@ -125,13 +90,13 @@ class VlcPlayer:
         미디어소스의 재생길이
         :return: 재생길이(ms)
         '''
-        return self.mediaplayer.get_length()
+        return self.media.get_length()
  
     def get_volume(self):
         '''
         :return: 현재 볼륨 상태 값 (0~100)
         '''
-        return self.mediaplayer.audio_get_volume()
+        return self.media.audio_get_volume()
  
     def set_volume(self, volume):
         '''
@@ -139,7 +104,7 @@ class VlcPlayer:
         :param volume: 0~100 사이 값
         :return:
         '''
-        return self.mediaplayer.audio_set_volume(volume)
+        return self.media.audio_set_volume(volume)
  
     # Return to the current state: playing; paused; other
     def get_state(self):
@@ -147,7 +112,7 @@ class VlcPlayer:
         현재 플레이어 상태 확인
         :return: playing : 1, paused : 0, 그외 -1
         '''
-        state = self.medialistplayer.get_state()
+        state = self.media.get_state()
         if state == vlc.State.Playing:
             return 1
         elif state == vlc.State.Paused:
@@ -160,7 +125,7 @@ class VlcPlayer:
         현재 playback 진척도
         :return: 미디어의 재생율 (1 이하 소숫점)
         '''
-        return self.mediaplayer.get_position()
+        return self.media.get_position()
  
     def set_position(self, float_val):
         '''
@@ -168,13 +133,13 @@ class VlcPlayer:
         :param float_val: 0~1 사이 float값
         :return:
         '''
-        return self.mediaplayer.set_position(float_val)
+        return self.media.set_position(float_val)
  
     def get_rate(self):
         '''
         :return: 재생속도
         '''
-        return self.mediaplayer.get_rate()
+        return self.media.get_rate()
  
     def set_rate(self, rate):
         '''
@@ -182,7 +147,7 @@ class VlcPlayer:
         :param rate: 배속
         :return:
         '''
-        return self.mediaplayer.set_rate(rate)
+        return self.media.set_rate(rate)
  
     def set_ratio(self, ratio):
         '''
@@ -191,8 +156,8 @@ class VlcPlayer:
         :return:
         '''
         # Must be set to 0, otherwise the screen width and height cannot be modified
-        self.mediaplayer.video_set_scale(0) 
-        self.mediaplayer.video_set_aspect_ratio(ratio)
+        self.media.video_set_scale(0) 
+        self.media.video_set_aspect_ratio(ratio)
  
     def add_callback(self, event_type, callback):
         '''
@@ -201,7 +166,7 @@ class VlcPlayer:
         :param callback: 콜백함수
         :return:
         '''
-        self.medialistplayer.event_manager().event_attach(event_type, callback)
+        self.media.event_manager().event_attach(event_type, callback)
  
     def remove_callback(self, event_type, callback):
         '''
@@ -210,4 +175,4 @@ class VlcPlayer:
         :param callback:
         :return:
         '''
-        self.medialistplayer.event_manager().event_detach(event_type, callback)
+        self.media.event_manager().event_detach(event_type, callback)
