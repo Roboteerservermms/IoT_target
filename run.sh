@@ -1,3 +1,4 @@
+git pull
 chmod 775 /sys/class/gpio/export
 chmod 775 /sys/class/gpio/unexport
 git pull
