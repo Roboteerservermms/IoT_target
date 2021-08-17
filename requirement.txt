@@ -1,3 +1,5 @@
-tqdm
 gTTS
 python-vlc
+pafy
+request
+youtube-dl

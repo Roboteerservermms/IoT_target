@@ -48,6 +48,7 @@ def gpio_handler(event):
     player.play(video_dic[None])
         
 def json_protocol(recv_data):
+    recv_data.decode("utf-8")
     command = json.loads(recv_data)
     print(command)
     video_dic[ command["GPIO_IN"] ]  = command["data"]
@@ -66,7 +67,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.recv_data = ''
         while True:
             try:
-                recv_data = self.request.recv(1024).decode("utf-8")
+                recv_data = self.request.recv(1024)
                 json_protocol(recv_data)
             except NameError as e:
                 print( f"{self.client_address[0]} got an error : {e}")
