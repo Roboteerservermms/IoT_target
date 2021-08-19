@@ -1,3 +1,6 @@
+export PYTHONPATH="/home/orangepi/detectAI"
+export PYTHONIOENCODING=UTF-8
+cd $PYTHONPATH
 git pull
 chmod 775 /sys/class/gpio/export
 chmod 775 /sys/class/gpio/unexport
