@@ -1,4 +1,4 @@
-export PYTHONPATH="/home/orangepi/detectAI"
+export PYTHONPATH="/home/orangepi/IoT_target"
 export PYTHONIOENCODING=UTF-8
 cd $PYTHONPATH
 git pull
