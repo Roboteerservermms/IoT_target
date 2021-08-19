@@ -78,7 +78,7 @@ class MyUDPHandler(socketserver.BaseRequestHandler):
         socket = self.request[1]
         logger.info(f"{self.client_address[0]} wrote: {data}")
         json_protocol(data.decode("utf-8"))
-        socket.sendto(bytes(video_dic,"utf-8"), self.client_address)
+        socket.sendto(json.dumps(video_dic).encode("utf-8"), self.client_address)
 
 if __name__ == "__main__": 
     HOST, PORT = "0.0.0.0", 8080 
