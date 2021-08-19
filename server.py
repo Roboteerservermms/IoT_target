@@ -5,9 +5,18 @@ from gtts import gTTS
 from video import VlcPlayer
 import time
 import pafy
-import requests
+import logging
 from vlc import EventType
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+file_handler = logging.FileHandler('target.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 GPIOOUT = [65, 68, 70, 71, 72, 73, 74, 76]
 GPIOIN = [111, 112, 113, 114, 117, 118, 75]  
@@ -51,12 +60,12 @@ def gpio_handler(event):
 def json_protocol(msg):
     command = json.loads(msg)
     video_dic[ command["GPIO_IN"] ]  = command["data"]
-    print(video_dic)
+    logger.info(video_dic)
     out_dic[ command["GPIO_IN"] ] = command["GPIO_OUT"]
-    print(out_dic)
+    logger.info(out_dic)
 
 def quit_server(client_addr): 
-    print("{} was gone".format(client_addr))
+    logger.info("{} was gone".format(client_addr))
 
 
 # -*- coding: utf-8 -*- 
@@ -67,17 +76,19 @@ class MyUDPHandler(socketserver.BaseRequestHandler):
         """ 클라이언트와 연결될 때 호출되는 함수 상위 클래스에는 handle() 메서드가 정의되어 있지 않기 때문에 여기서 오버라이딩을 해야함 """
         data = self.request[0]
         socket = self.request[1]
-        print(f"{self.client_address[0]} wrote: {data}")
+        logger.info(f"{self.client_address[0]} wrote: {data}")
         json_protocol(data.decode("utf-8"))
+        socket.sendto(video_dic, self.client_address)
 
 if __name__ == "__main__": 
     HOST, PORT = "0.0.0.0", 8080 
-    # 서버를 생성합니다. 호스트는 localhost, 포트 번호는 8080 
+    # 서버를 생성합니다. 호스트는 localhost, 포트 번호는 8080
+    global player
     player = VlcPlayer('--input-repeat=999999', '--mouse-hide-timeout=0')
     player.play(video_dic[None])
     player.add_callback(EventType.MediaPlayerEndReached,gpio_handler)
     server = socketserver.UDPServer((HOST, PORT), MyUDPHandler)
-    print("waiting for connection...") 
+    logger.info("waiting for connection...") 
     # Ctrl - C 로 종료하기 전까지는 서버는 멈추지 않고 작동 
     server.serve_forever()
 
