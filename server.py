@@ -1,4 +1,4 @@
-from socket import *
+import socket
 import subprocess
 import json
 from gtts import gTTS
@@ -48,15 +48,11 @@ def rtsp(GPIOIN, data):
 def broadcast(GPIO, fileName):
     video_dic[GPIOIN] = fileName
 
-def gpio_handler(event):
-    for i in GPIOIN:
-        command = f"cat /sys/class/gpio/gpio{i}/value"
-        if str2bool(subprocess.getoutput(command)):
-            player.play(video_dic[i])
-            subprocess.getoutput(f"echo 1 > /sys/class/gpio/gpio{out_dic[i]}/value")
-            break
-    player.play(video_dic[None])
-        
+def video_end_handler(event):
+    logger.info("video end reached!")
+    global status
+    status = True
+
 def json_protocol(msg):
     command = json.loads(msg)
     video_dic[ command["GPIO_IN"] ]  = command["data"]
@@ -67,28 +63,36 @@ def json_protocol(msg):
 def quit_server(client_addr): 
     logger.info("{} was gone".format(client_addr))
 
-
-# -*- coding: utf-8 -*- 
-import socketserver
-class MyUDPHandler(socketserver.BaseRequestHandler):
-    """ The request handler class for our server. It is instantiated once per connection to the server, and must override the handle() method to implement communication to the client. """
-    def handle(self): 
-        """ 클라이언트와 연결될 때 호출되는 함수 상위 클래스에는 handle() 메서드가 정의되어 있지 않기 때문에 여기서 오버라이딩을 해야함 """
-        data = self.request[0]
-        socket = self.request[1]
-        logger.info(f"{self.client_address[0]} wrote: {data}")
-        json_protocol(data.decode("utf-8"))
-        socket.sendto(json.dumps(video_dic).encode("utf-8"), self.client_address)
-
 if __name__ == "__main__": 
-    HOST, PORT = "0.0.0.0", 8080 
+    HOST, PORT, bufferSize = "0.0.0.0", 8080 , 1024
     # 서버를 생성합니다. 호스트는 localhost, 포트 번호는 8080
-    global player
     player = VlcPlayer('--input-repeat=999999', '--mouse-hide-timeout=0')
+    player.add_callback(EventType.MediaPlayerEndReached,video_end_handler)
+    UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    UDPServerSocket.setblocking(0)
+    UDPServerSocket.bind((HOST,PORT))
+    status = False
     player.play(video_dic[None])
-    player.add_callback(EventType.MediaPlayerEndReached,gpio_handler)
-    server = socketserver.UDPServer((HOST, PORT), MyUDPHandler)
-    logger.info("waiting for connection...") 
-    # Ctrl - C 로 종료하기 전까지는 서버는 멈추지 않고 작동 
-    server.serve_forever()
-
+    while(True):
+        if status:
+            status = False
+            index = None
+            for i in GPIOIN:
+                command = f"cat /sys/class/gpio/gpio{i}/value"
+                if str2bool(subprocess.getoutput(command)):
+                    index = i
+                    break
+            player.play(video_dic[index])
+            subprocess.getoutput(f"echo 1 > /sys/class/gpio/gpio{out_dic[index]}/value")
+        try:
+            recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
+            data = recvdata.decode("utf-8") 
+            address = addr
+            json_protocol(data)
+            logger.info(f"{address} wrote: {data}")
+            UDPServerSocket.sendto(json.dumps(video_dic).encode(), address)
+        except socket.error:
+            pass
+        
+        # Ctrl - C 로 종료하기 전까지는 서버는 멈추지 않고 작동 
+    
