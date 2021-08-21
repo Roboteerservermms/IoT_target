@@ -1,0 +1,4 @@
+gTTS
+python-vlc
+pafy
+youtube-dl
