@@ -77,15 +77,15 @@ if __name__ == "__main__":
         if status:
             status = False
             index = None
-            value = 0
             for i in GPIOIN:
-                command = f"cat /sys/class/gpio/gpio{i}/value"
-                if str2bool(subprocess.getoutput(command)):
+                in_command = f"cat /sys/class/gpio/gpio{i}/value"
+                out_command = f"echo 0 > /sys/class/gpio/gpio{out_dic[i]}/value"
+                if str2bool(subprocess.getoutput(in_command)):
                     index = i
-                    value = 1
-                    break
+                    out_command = f"echo 1 > /sys/class/gpio/gpio{out_dic[i]}/value"
+                subprocess.getoutput(out_command)
             player.play(video_dic[index])
-            subprocess.getoutput(f"echo {value} > /sys/class/gpio/gpio{out_dic[index]}/value")
+            
         try:
             recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
             data = recvdata.decode("utf-8") 
