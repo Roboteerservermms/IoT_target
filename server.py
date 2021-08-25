@@ -45,7 +45,7 @@ def rtsp(GPIOIN, data):
     best = video.getbest()
     video_dic[GPIOIN] = best
 
-def broadcast(GPIO, fileName):
+def broadcast(GPIOIN, fileName):
     video_dic[GPIOIN] = fileName
 
 def video_end_handler(event):
@@ -53,9 +53,22 @@ def video_end_handler(event):
     global status
     status = True
 
+def scheduler(GPIOIN, data):
+    global status
+    temp = video_dic[GPIOIN]
+    video_dic[GPIOIN] = schedule_dic[GPIOIN]
+    schedule_dic[GPIOIN] = temp
+    status = True
+    
+
 def json_protocol(msg):
     command = json.loads(msg)
-    video_dic[ command["GPIO_IN"] ]  = command["data"]
+    if command["category"] == "TTS":
+        TTS(command["GPIO_IN"],command["data"])
+    elif command["category"] == "rtsp":
+        rtsp(command["GPIO_IN"],command["data"])
+    else:
+        broadcast(command["GPIO_IN"],command["data"])
     logger.info(video_dic)
     out_dic[ command["GPIO_IN"] ] = command["GPIO_OUT"]
     logger.info(out_dic)
@@ -95,6 +108,4 @@ if __name__ == "__main__":
             UDPServerSocket.sendto(json.dumps(video_dic).encode(), address)
         except socket.error:
             pass
-        
-        # Ctrl - C 로 종료하기 전까지는 서버는 멈추지 않고 작동 
-    
+        # Ctrl - C 로 종료하기 전까지는 서버는 멈추지 않고 작동
