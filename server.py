@@ -19,7 +19,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 GPIOOUT = [65, 68, 70, 71, 72, 73, 74, 76]
-GPIOIN = [111, 112, 113, 114, 117, 118, 75]  
+GPIOIN = [111, 112, 113, 114, 229, 117, 118, 75]  
 host = "0.0.0.0"
 port = 8080
 # 문자열 부울대수로 변화하기
