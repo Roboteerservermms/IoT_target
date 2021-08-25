@@ -28,4 +28,4 @@ for gpio in "111" "112" "113" "114" "229" "117" "118" "75"; do
     sleep 1
     echo "in" > /sys/class/gpio/gpio${gpio}/direction
 done
-xfce4-terminal -e "python3 server.py"
+python3 server.py
