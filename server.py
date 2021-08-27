@@ -43,7 +43,7 @@ def TTS(GPIOIN, data):
 def rtsp(GPIOIN, data):
     video = pafy.new(data)
     best = video.getbest()
-    video_dic[GPIOIN] = best
+    video_dic[GPIOIN] = best.url
 
 def broadcast(GPIOIN, fileName):
     video_dic[GPIOIN] = fileName
