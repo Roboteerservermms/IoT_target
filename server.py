@@ -58,6 +58,7 @@ def video_end_handler(event):
     video_sig = True
 
 def scheduler_sig_handler():
+    logger.info("scheduler awake!")
     global schedule_sig
     schedule_sig = True
 
@@ -79,6 +80,7 @@ def scheduler(day,time,data):
     else:
         schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
     schedule_dic[f"{time}"] = data
+    print(f"{schedule_dic}")
 
 def json_protocol(msg):
     command = json.loads(msg)
