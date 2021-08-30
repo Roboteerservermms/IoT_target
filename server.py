@@ -27,7 +27,7 @@ port = 8080
 # 문자열 부울대수로 변화하기
 video_dic = {111 : "blackscreen.mp4", 112: "blackscreen.mp4", 113 :"blackscreen.mp4" , 114: "blackscreen.mp4", 229: "blackscreen.mp4", 117 : "blackscreen.mp4", 118 : "blackscreen.mp4", 74 : "blackscreen.mp4", 75 : "blackscreen.mp4", None: "blackscreen.mp4"}
 out_dic = {111 : None, 112: None, 113 :None , 114: None, 229: None, 117 : None, 118 : None, 74 : None, 75 : None, None: None}
-schedule_dic = dict()
+schedule_dic = {}
 def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
 
@@ -104,10 +104,11 @@ if __name__ == "__main__":
     UDPServerSocket.setblocking(0)
     UDPServerSocket.bind((HOST,PORT))
     video_sig = False
+    schedule_sig = False
     player.play(video_dic[None])
     while(True):
         if schedule_sig:
-            now_time = time.strftime('%H-%M')
+            now_time = time.strftime('%H:%M')
             player.play(schedule_dic[now_time])
         elif video_sig:
             video_sig = False
