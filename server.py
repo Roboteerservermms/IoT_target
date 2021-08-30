@@ -128,7 +128,7 @@ if __name__ == "__main__":
         try:
             recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
             data = recvdata.decode("utf-8") 
-            logger.info(f"{address} wrote: {data}")
+            logger.info(f"{addr} wrote: {data}")
             address = addr
             json_protocol(data)
             UDPServerSocket.sendto(json.dumps(video_dic).encode(), address)
