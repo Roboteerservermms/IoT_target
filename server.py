@@ -81,7 +81,7 @@ def scheduler(day,time,data):
 def json_protocol(msg):
     command = json.loads(msg)
     if command["category"] == "schedule":
-        schedule(command["day"], command["time"], command["data"])
+        scheduler(command["day"], command["time"], command["data"])
     elif command["category"] == "TTS":
         TTS(command["GPIO_IN"],command["data"])
     elif command["category"] == "rtsp":
