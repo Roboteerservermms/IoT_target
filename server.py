@@ -7,6 +7,8 @@ import time
 import pafy
 import logging
 from vlc import EventType
+import schedule
+import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,13 +21,13 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 GPIOOUT = [65, 68, 70, 71, 72, 73, 74, 76]
-GPIOIN = [111, 112, 113, 114, 229, 117, 118, 75]  
+GPIOIN = [111, 112, 113, 114, 229, 117, 118, 75]
 host = "0.0.0.0"
 port = 8080
 # 문자열 부울대수로 변화하기
 video_dic = {111 : "blackscreen.mp4", 112: "blackscreen.mp4", 113 :"blackscreen.mp4" , 114: "blackscreen.mp4", 229: "blackscreen.mp4", 117 : "blackscreen.mp4", 118 : "blackscreen.mp4", 74 : "blackscreen.mp4", 75 : "blackscreen.mp4", None: "blackscreen.mp4"}
 out_dic = {111 : None, 112: None, 113 :None , 114: None, 229: None, 117 : None, 118 : None, 74 : None, 75 : None, None: None}
-
+schedule_dic = dict()
 def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
 
@@ -50,20 +52,37 @@ def broadcast(GPIOIN, fileName):
 
 def video_end_handler(event):
     logger.info("video end reached!")
-    global status
-    status = True
+    global video_sig
+    video_sig = True
 
-def scheduler(GPIOIN, data):
-    global status
-    temp = video_dic[GPIOIN]
-    video_dic[GPIOIN] = schedule_dic[GPIOIN]
-    schedule_dic[GPIOIN] = temp
-    status = True
-    
+def scheduler_sig_handler():
+    global schedule_sig
+    schedule_sig = True
+
+def scheduler(day,time,data):
+    if day == "mon":
+        schedule.every().monday.at(f"{time}").do(scheduler_sig_handler)
+    elif day == "tue":
+        schedule.every().tuesday.at(f"{time}").do(scheduler_sig_handler)
+    elif day == "wen":
+        schedule.every().wednesday.at(f"{time}").do(scheduler_sig_handler)
+    elif day == "thu":
+        schedule.every().thursday.at(f"{time}").do(scheduler_sig_handler)
+    elif day == "fri":
+        schedule.every().friday.at(f"{time}").do(scheduler_sig_handler)
+    elif day == "sat":
+        schedule.every().saturday.at(f"{time}").do(scheduler_sig_handler)
+    elif day == "sun":
+        schedule.every().sunday.at(f"{time}").do(scheduler_sig_handler)
+    else:
+        schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
+    schedule_dic[f"{time}"] = data
 
 def json_protocol(msg):
     command = json.loads(msg)
-    if command["category"] == "TTS":
+    if command["category"] == "schedule":
+        schedule(command("day"), command("time"), command["data"])
+    elif command["category"] == "TTS":
         TTS(command["GPIO_IN"],command["data"])
     elif command["category"] == "rtsp":
         rtsp(command["GPIO_IN"],command["data"])
@@ -84,11 +103,14 @@ if __name__ == "__main__":
     UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPServerSocket.setblocking(0)
     UDPServerSocket.bind((HOST,PORT))
-    status = False
+    video_sig = False
     player.play(video_dic[None])
     while(True):
-        if status:
-            status = False
+        if schedule_sig:
+            now_time = time.strftime('%H-%M')
+            player.play(schedule_dic[now_time])
+        elif video_sig:
+            video_sig = False
             index = None
             for i in GPIOIN:
                 in_command = f"cat /sys/class/gpio/gpio{i}/value"
@@ -98,7 +120,6 @@ if __name__ == "__main__":
                     out_command = f"echo 1 > /sys/class/gpio/gpio{out_dic[i]}/value"
                 subprocess.getoutput(out_command)
             player.play(video_dic[index])
-            
         try:
             recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
             data = recvdata.decode("utf-8") 
