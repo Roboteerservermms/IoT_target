@@ -41,6 +41,7 @@ def TTS(GPIOIN, data):
     tts = gTTS(text=data, lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
     video_dic[GPIOIN] = fileName
+    
 
 def rtsp(GPIOIN, data):
     video = pafy.new(data)
@@ -84,12 +85,15 @@ def json_protocol(msg):
         scheduler(command["day"], command["time"], command["data"])
     elif command["category"] == "TTS":
         TTS(command["GPIO_IN"],command["data"])
+        out_dic[ command["GPIO_IN"] ] = command["GPIO_OUT"]
     elif command["category"] == "rtsp":
         rtsp(command["GPIO_IN"],command["data"])
+        out_dic[ command["GPIO_IN"] ] = command["GPIO_OUT"]
     else:
         broadcast(command["GPIO_IN"],command["data"])
+        out_dic[ command["GPIO_IN"] ] = command["GPIO_OUT"]
     logger.info(video_dic)
-    out_dic[ command["GPIO_IN"] ] = command["GPIO_OUT"]
+    
     logger.info(out_dic)
 
 def quit_server(client_addr): 
@@ -124,9 +128,9 @@ if __name__ == "__main__":
         try:
             recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
             data = recvdata.decode("utf-8") 
+            logger.info(f"{address} wrote: {data}")
             address = addr
             json_protocol(data)
-            logger.info(f"{address} wrote: {data}")
             UDPServerSocket.sendto(json.dumps(video_dic).encode(), address)
         except socket.error:
             pass
