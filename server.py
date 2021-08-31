@@ -41,6 +41,7 @@ def TTS(GPIOIN, data):
     nowTime = time.strftime("%Y%m%d-%H%M%S")
     tts = gTTS(text=data, lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
+    tts.save(fileName)
     video_dic[GPIOIN] = fileName
     
 
@@ -62,7 +63,7 @@ def scheduler_sig_handler():
     global schedule_sig
     schedule_sig = True
 
-def scheduler(day,time,data):
+def scheduler(day,data,time=None):
     if day == "mon":
         schedule.every().monday.at(f"{time}").do(scheduler_sig_handler)
     elif day == "tue":
@@ -77,15 +78,21 @@ def scheduler(day,time,data):
         schedule.every().saturday.at(f"{time}").do(scheduler_sig_handler)
     elif day == "sun":
         schedule.every().sunday.at(f"{time}").do(scheduler_sig_handler)
+    elif day == "everyday":
+        schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
     else:
         schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
     schedule_dic[f"{time}"] = data
     print(f"{schedule_dic}")
 
 def json_protocol(msg):
+    global command
     command = json.loads(msg)
     if command["category"] == "schedule":
-        scheduler(command["day"], command["time"], command["data"])
+        try :
+            scheduler(command["day"], command["data"],  command["time"])
+        except KeyError as e:
+            scheduler(command["day"], command["data"])
     elif command["category"] == "TTS":
         TTS(command["GPIO_IN"],command["data"])
         out_dic[ command["GPIO_IN"] ] = command["GPIO_OUT"]
@@ -117,6 +124,7 @@ if __name__ == "__main__":
         schedule.run_pending()
         if schedule_sig:
             now_time = time.strftime('%H:%M')
+            logger.info("schedule is running!")
             player.play(schedule_dic[now_time])
         elif video_sig:
             video_sig = False
