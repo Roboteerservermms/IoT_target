@@ -38,7 +38,7 @@ def sig_handler(signum, frame):
     exitThread = True
 
 def TTS(IN, data):
-    nowTime = time.strftime("%Y%m%d-%H%M%S")
+    nowTime = t.strftime("%Y%m%d-%H%M%S")
     tts = gTTS(text=data, lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
