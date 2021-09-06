@@ -3,7 +3,7 @@ import subprocess
 import json
 from gtts import gTTS
 from video import VlcPlayer
-import time
+import time as t
 import pafy
 import logging
 from vlc import EventType
@@ -27,7 +27,7 @@ port = 8080
 # 문자열 부울대수로 변화하기
 video_dic = {111 : "blackscreen.mp4", 112: "blackscreen.mp4", 113 :"blackscreen.mp4" , 114: "blackscreen.mp4", 229: "blackscreen.mp4", 117 : "blackscreen.mp4", 118 : "blackscreen.mp4", 74 : "blackscreen.mp4", 75 : "blackscreen.mp4", None: "blackscreen.mp4"}
 out_dic = {111 : None, 112: None, 113 :None , 114: None, 229: None, 117 : None, 118 : None, 74 : None, 75 : None, None: None}
-schedule_dic = {}
+scheduleList = {}
 
 def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
@@ -139,11 +139,44 @@ if __name__ == "__main__":
             player.play(video_dic[index])
         try:
             recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
-            data = recvdata.decode("utf-8") 
+            data = recvdata.decode("utf-8")
             logger.info(f"{addr} wrote: {data}")
             address = addr
-            json_protocol(data)
-            UDPServerSocket.sendto(json.dumps(video_dic).encode(), address)
+            command = json.loads(data)
+            if command["category"] == "schedule":
+                try :
+                    day = command["day"]
+                    time = command["time"]
+                    if day == "mon":
+                        schedule.every().monday.at(f"{time}").do(scheduler_sig_handler)
+                    elif day == "tue":
+                        schedule.every().tuesday.at(f"{time}").do(scheduler_sig_handler)
+                    elif day == "wen":
+                        schedule.every().wednesday.at(f"{time}").do(scheduler_sig_handler)
+                    elif day == "thu":
+                        schedule.every().thursday.at(f"{time}").do(scheduler_sig_handler)
+                    elif day == "fri":
+                        schedule.every().friday.at(f"{time}").do(scheduler_sig_handler)
+                    elif day == "sat":
+                        schedule.every().saturday.at(f"{time}").do(scheduler_sig_handler)
+                    elif day == "sun":
+                        schedule.every().sunday.at(f"{time}").do(scheduler_sig_handler)
+                    elif day == "everyday":
+                        schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
+                    else:
+                        schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
+                    scheduleList[time] = data
+                    print(f"{scheduleList}")
+                except KeyError as e:
+                    scheduleList["00:00"] = data
+            elif command["category"] == "TTS":
+                TTS(command["GPIO_IN"],command["data"])
+            elif command["category"] == "rtsp":
+                rtsp(command["GPIO_IN"],command["data"])
+            else:
+                broadcast(command["GPIO_IN"],command["data"])
+            logger.info(videoList)
+            UDPServerSocket.sendto(json.dumps(videoList).encode(), address)
         except socket.error:
             pass
         # Ctrl - C 로 종료하기 전까지는 서버는 멈추지 않고 작동
