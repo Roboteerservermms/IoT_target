@@ -7,7 +7,7 @@ import time as t
 import pafy
 import logging
 from vlc import EventType
-import schedule
+import schedule as sch
 import datetime
 
 logger = logging.getLogger()
@@ -28,7 +28,7 @@ port = 8080
 video_dic = {111 : "blackscreen.mp4", 112: "blackscreen.mp4", 113 :"blackscreen.mp4" , 114: "blackscreen.mp4", 229: "blackscreen.mp4", 117 : "blackscreen.mp4", 118 : "blackscreen.mp4", 74 : "blackscreen.mp4", 75 : "blackscreen.mp4", None: "blackscreen.mp4"}
 out_dic = {111 : None, 112: None, 113 :None , 114: None, 229: None, 117 : None, 118 : None, 74 : None, 75 : None, None: None}
 scheduleList = {}
-
+schedule = sch
 def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
 
