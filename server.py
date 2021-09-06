@@ -79,7 +79,7 @@ if __name__ == "__main__":
     while(True):
         schedule.run_pending()
         if schedule_sig:
-            now_time = time.strftime('%H:%M')
+            now_time = t.strftime('%H:%M')
             logger.info("schedule is running!")
             player.play(scheduleList[now_time])
         elif video_sig:
