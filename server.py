@@ -79,10 +79,12 @@ if __name__ == "__main__":
     while(True):
         schedule.run_pending()
         if schedule_sig:
-            now_time = t.strftime('%H:%M')
-            logger.info("schedule is running!")
-            player.play(scheduleList[now_time])
-            schedule_sig = False
+            try :
+                now_time = t.strftime('%H:%M')
+                logger.info("schedule is running!")
+                player.play(scheduleList[now_time])
+            except KeyError:
+                schedule_sig = False
         elif video_sig:
             video_sig = False
             index = None
