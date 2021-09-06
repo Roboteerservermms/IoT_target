@@ -91,7 +91,8 @@ if __name__ == "__main__":
                 if str2bool(subprocess.getoutput(in_command)):
                     index = i
                     out_command = f"echo 1 > /sys/class/gpio/gpio{out_dic[i]}/value"
-                subprocess.getoutput(out_command)
+                    break
+            subprocess.getoutput(out_command)
             player.play(video_dic[index])
             logger.info(f"in {index} out {out_dic[index]} video {video_dic[index]}")
         try:
