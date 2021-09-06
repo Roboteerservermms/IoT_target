@@ -44,10 +44,13 @@ def TTS(IN, data):
     tts.save(fileName)
     video_dic[IN] = fileName
 
-def rtsp(IN, data):
+def youtube(IN, data):
     video = pafy.new(data)
     best = video.getbest()
     video_dic[IN] = best.url
+
+def rtsp(IN, data):
+    video_dic[IN] = data
 
 def broadcast(IN, fileName):
     video_dic[IN] = fileName
