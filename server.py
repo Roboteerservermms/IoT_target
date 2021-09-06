@@ -123,7 +123,7 @@ if __name__ == "__main__":
                         schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
                     else:
                         schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
-                    scheduleList[time] = data
+                    scheduleList[time] = command["data"]
                     print(f"{scheduleList}")
                 except KeyError as e:
                     scheduleList["00:00"] = data
