@@ -91,14 +91,17 @@ if __name__ == "__main__":
         elif video_sig:
             video_sig = False
             index = None
+            gpioBoolean = 0
             for i in GPIOIN:
                 in_command = f"cat /sys/class/gpio/gpio{i}/value"
                 out_command = f"echo 0 > /sys/class/gpio/gpio{out_dic[i]}/value"
                 if str2bool(subprocess.getoutput(in_command)):
                     index = i
-                    out_command = f"echo 1 > /sys/class/gpio/gpio{out_dic[i]}/value"
-                    break
-            subprocess.getoutput(out_command)
+                    gpioBoolean = 1
+                else:
+                    gpioBoolean = 0
+                out_command = f"echo {gpioBoolean} > /sys/class/gpio/gpio{out_dic[i]}/value"
+                subprocess.getoutput(out_command)
             player.play(video_dic[index])
             logger.info(f"in {index} out {out_dic[index]} video {video_dic[index]}")
         try:
