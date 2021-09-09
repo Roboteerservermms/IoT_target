@@ -8,9 +8,6 @@ import pafy
 import logging
 from vlc import EventType
 import schedule as sch
-from queue import Queue
-import asyncio
-from gpio import GPIOIN_thread
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
