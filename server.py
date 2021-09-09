@@ -8,7 +8,9 @@ import pafy
 import logging
 from vlc import EventType
 import schedule as sch
-import datetime
+from queue import Queue
+import asyncio
+from gpio import GPIOIN_thread
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -37,23 +39,27 @@ def sig_handler(signum, frame):
     global exitThread
     exitThread = True
 
-def TTS(IN, data):
+def TTS(IN, OUT, data):
     nowTime = t.strftime("%Y%m%d-%H%M%S")
     tts = gTTS(text=data, lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
     video_dic[IN] = fileName
+    out_dic[IN].append(OUT)
 
-def youtube(IN, data):
+def youtube(IN, OUT, data):
     video = pafy.new(data)
     best = video.getbest()
     video_dic[IN] = best.url
+    out_dic[IN].append(OUT)
 
-def rtsp(IN, data):
+def rtsp(IN, OUT, data):
     video_dic[IN] = data
+    out_dic[IN].append(OUT)
 
-def broadcast(IN, fileName):
+def broadcast(IN, OUT, fileName):
     video_dic[IN] = fileName
+    out_dic[IN].append(OUT)
 
 def video_end_handler(event):
     logger.info("video end reached!")
@@ -140,11 +146,11 @@ if __name__ == "__main__":
                 except KeyError as e:
                     scheduleList["00:00"] = data
             elif command["category"] == "TTS":
-                TTS(command["GPIO_IN"],command["data"])
+                TTS(command["GPIO_IN"], command["GPIO_OUT"], command["data"])
             elif command["category"] == "rtsp":
-                rtsp(command["GPIO_IN"],command["data"])
+                rtsp(command["GPIO_IN"], command["GPIO_OUT"], command["data"])
             else:
-                broadcast(command["GPIO_IN"],command["data"])
+                broadcast(command["GPIO_IN"], command["GPIO_OUT"], command["data"])
             logger.info(video_dic)
             logger.info(out_dic)
         except socket.error:
