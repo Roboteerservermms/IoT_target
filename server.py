@@ -24,7 +24,7 @@ GPIOIN = [111, 112, 113, 114, 229, 117, 118, 75]
 host = "0.0.0.0"
 port = 8080
 # 문자열 부울대수로 변화하기
-video_dic = {111 : ["blackscreen.mp4"], 112: ["blackscreen.mp4"], 113 :["blackscreen.mp4"] , 114: ["blackscreen.mp4"], 229: ["blackscreen.mp4"], 117 : ["blackscreen.mp4"], 118 : ["blackscreen.mp4"], 74 : ["blackscreen.mp4"], 75 : ["blackscreen.mp4"], None: ["blackscreen.mp4"]}
+video_dic = {111 : [], 112: [], 113 :[] , 114: [], 229: [], 117 : [], 118 : [], 74 : [], 75 : [], None: "blackscreen.mp4"}
 out_dic = {111 : [], 112: [], 113 :[] , 114: [], 229: [], 117 : [], 118 : [], 74 : [], 75 : [], None: []}
 scheduleList = {}
 schedule = sch
