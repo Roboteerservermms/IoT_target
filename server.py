@@ -24,10 +24,11 @@ GPIOIN = [111, 112, 113, 114, 229, 117, 118, 75]
 host = "0.0.0.0"
 port = 8080
 # 문자열 부울대수로 변화하기
-video_dic = {111 : "blackscreen.mp4", 112: "blackscreen.mp4", 113 :"blackscreen.mp4" , 114: "blackscreen.mp4", 229: "blackscreen.mp4", 117 : "blackscreen.mp4", 118 : "blackscreen.mp4", 74 : "blackscreen.mp4", 75 : "blackscreen.mp4", None: "blackscreen.mp4"}
+video_dic = {111 : ["blackscreen.mp4"], 112: ["blackscreen.mp4"], 113 :["blackscreen.mp4"] , 114: ["blackscreen.mp4"], 229: ["blackscreen.mp4"], 117 : ["blackscreen.mp4"], 118 : ["blackscreen.mp4"], 74 : ["blackscreen.mp4"], 75 : ["blackscreen.mp4"], None: ["blackscreen.mp4"]}
 out_dic = {111 : [], 112: [], 113 :[] , 114: [], 229: [], 117 : [], 118 : [], 74 : [], 75 : [], None: []}
 scheduleList = {}
 schedule = sch
+jsonPath = "./json/"
 def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
 
@@ -41,22 +42,26 @@ def TTS(IN, OUT, data):
     tts = gTTS(text=data, lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
-    video_dic[IN] = fileName
-    out_dic[IN].extend(OUT)
+    for i in IN:
+        video_dic[i].extend(fileName)
+        out_dic[i].extend(OUT)
 
 def youtube(IN, OUT, data):
     video = pafy.new(data)
     best = video.getbest()
-    video_dic[IN] = best.url
-    out_dic[IN].extend(OUT)
+    for i in IN:
+        video_dic[i].extend(best.url)
+        out_dic[i].extend(OUT)
 
 def rtsp(IN, OUT, data):
-    video_dic[IN] = data
-    out_dic[IN].extend(OUT)
+    for i in IN:
+        video_dic[i].extend(data)
+        out_dic[i].extend(OUT)
 
 def broadcast(IN, OUT, fileName):
-    video_dic[IN] = fileName
-    out_dic[IN].extend(OUT)
+    for i in IN:
+        video_dic[i].extend(fileName)
+        out_dic[i].extend(OUT)
 
 def video_end_handler(event):
     logger.info("video end reached!")
@@ -108,7 +113,8 @@ if __name__ == "__main__":
                     for o in out_dic[i]:
                         out_command = f"echo {gpioBoolean} > /sys/class/gpio/gpio{o}/value"
                         subprocess.getoutput(out_command)
-            player.play(video_dic[index])
+            for v in video_dic[index]:
+                player.play(v)
             logger.info(f"in {index} out {out_dic[index]} video {video_dic[index]}")
         try:
             recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
