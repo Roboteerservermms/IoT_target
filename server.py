@@ -42,21 +42,21 @@ def TTS(IN, OUT, data):
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
     video_dic[IN] = fileName
-    out_dic[IN].append(OUT)
+    out_dic[IN] += OUT
 
 def youtube(IN, OUT, data):
     video = pafy.new(data)
     best = video.getbest()
     video_dic[IN] = best.url
-    out_dic[IN].append(OUT)
+    out_dic[IN] += OUT
 
 def rtsp(IN, OUT, data):
     video_dic[IN] = data
-    out_dic[IN].append(OUT)
+    out_dic[IN] += OUT
 
 def broadcast(IN, OUT, fileName):
     video_dic[IN] = fileName
-    out_dic[IN].append(OUT)
+    out_dic[IN] += OUT
 
 def video_end_handler(event):
     logger.info("video end reached!")
