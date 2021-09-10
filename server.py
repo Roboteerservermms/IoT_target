@@ -50,18 +50,18 @@ def youtube(IN, OUT, data):
     video = pafy.new(data)
     best = video.getbest()
     for i in IN:
-        video_dic[i].extend(best.url)
-        out_dic[i].extend(OUT)
+        video_dic[int(i)].extend(best.url)
+        out_dic[int(i)].extend(OUT)
 
 def rtsp(IN, OUT, data):
     for i in IN:
-        video_dic[i].extend(data)
-        out_dic[i].extend(OUT)
+        video_dic[int(i)].extend(data)
+        out_dic[int(i)].extend(OUT)
 
 def broadcast(IN, OUT, fileName):
     for i in IN:
-        video_dic[i].extend(fileName)
-        out_dic[i].extend(OUT)
+        video_dic[int(i)].extend(fileName)
+        out_dic[int(i)].extend(OUT)
 
 def video_end_handler(event):
     logger.info("video end reached!")
