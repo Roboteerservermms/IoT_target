@@ -43,24 +43,24 @@ def TTS(IN, OUT, data):
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
     for i in IN:
-        video_dic[i].extend(fileName)
-        out_dic[i].extend(OUT)
+        video_dic[int(i)].append(fileName)
+        out_dic[int(i)].extend(OUT)
 
 def youtube(IN, OUT, data):
     video = pafy.new(data)
     best = video.getbest()
     for i in IN:
-        video_dic[int(i)].extend(best.url)
+        video_dic[int(i)].append(best.url)
         out_dic[int(i)].extend(OUT)
 
 def rtsp(IN, OUT, data):
     for i in IN:
-        video_dic[int(i)].extend(data)
+        video_dic[int(i)].append(data)
         out_dic[int(i)].extend(OUT)
 
 def broadcast(IN, OUT, fileName):
     for i in IN:
-        video_dic[int(i)].extend(fileName)
+        video_dic[int(i)].append(fileName)
         out_dic[int(i)].extend(OUT)
 
 def video_end_handler(event):
