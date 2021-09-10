@@ -39,8 +39,9 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self, logger):
         # Receive a message from a client
         logger.info("Got an UDP Message from {}".format(self.client_address[0]))
-        msgRecvd = self.rfile.readline().strip()
-        msgJson = json.load(msgRecvd)
+        data = self.request[0].strip()
+        socket = self.request[1]
+        msgJson = json.load(data)
         if msgJson["category"] == "schedule":
             scheduleAdd(msgJson,mainJson)
         elif msgJson["category"] == "TTS":
@@ -56,7 +57,7 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
         with open("main.json") as f:
             json.dump(mainJson, f)
         # Send a message from a client
-        self.wfile.write(f"{json.dump(mainJson)}".encode())
+        socket.sendto(f"{json.dump(mainJson)}",self.client_address)
 
 #쓰레드 종료용 시그널 함수
 def sig_handler(signum, frame):
