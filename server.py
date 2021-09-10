@@ -43,8 +43,14 @@ def TTS(IN, OUT, data):
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
     for i in IN:
-        video_dic[int(i)].append(fileName)
-        out_dic[int(i)].extend(OUT)
+        if fileName in video_dic[int(i)]:
+            pass
+        else:
+            video_dic[int(i)].append(fileName)
+        if OUT in out_dic[int(i)]:
+            pass
+        else:
+            out_dic[int(i)].extend(OUT)
 
 def youtube(IN, OUT, data):
     video = pafy.new(data)
