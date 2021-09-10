@@ -86,7 +86,7 @@ if __name__ == "__main__":
     UDPServerSocket.bind((HOST,PORT))
     video_sig = False
     schedule_sig = False
-    player.play(video_dic[None])
+    player.play(video_dic[None][0])
     while(True):
         schedule.run_pending()
         if schedule_sig:
