@@ -70,7 +70,7 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
         with open(f"{jsonPath}{nowTime}.json","w") as f:
             json.dump(msgJson, f)
         logger.info(f"The Message is {msgJson}")
-        with open("main.json", "w") as f:
+        with open('./json/main.json', "w") as f:
             json.dump(mainJson, f)
         logger.info("Got an UDP Message from {}".format(self.client_address[0]))
         # Send a message from a client
