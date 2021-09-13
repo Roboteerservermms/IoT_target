@@ -51,7 +51,7 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self):
         # Receive a message from a client
         logger.info("Got an UDP Message from {}".format(self.client_address[0]))
-        data = str(self.request[0].strip())
+        data = self.request[0].decode("utf-8")
         socket = self.request[1]
         msgJson = json.load(data)
         if msgJson["category"] == "schedule":
