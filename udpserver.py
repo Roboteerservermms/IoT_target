@@ -50,9 +50,10 @@ def scheduleAdd(inMsg, mainJson):
 class MyUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self):
         # Receive a message from a client
-        logger.info("Got an UDP Message from {}".format(self.client_address[0]))
+        logger.info(f"Got an UDP Message from {self.client_address[0]}")
         data = self.request[0].decode("utf-8")
         socket = self.request[1]
+        logger.info(f"Got an UDP Message from {data}")
         msgJson = json.load(data)
         if msgJson["category"] == "schedule":
             scheduleAdd(msgJson,mainJson)
