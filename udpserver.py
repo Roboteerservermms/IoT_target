@@ -54,7 +54,7 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
         data = self.request[0].decode("utf-8")
         socket = self.request[1]
         logger.info(f"Got an UDP Message from {data}")
-        msgJson = json.load(data)
+        msgJson = json.loads(data)
         if msgJson["category"] == "schedule":
             scheduleAdd(msgJson,mainJson)
         elif msgJson["category"] == "TTS":
