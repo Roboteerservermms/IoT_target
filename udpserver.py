@@ -38,10 +38,10 @@ def TTS(inMsg, mainJson):
 
 def rtsp(inMsg, mainJson):
     mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
-    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(inMsg["data"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(str(inMsg["data"]))
 
 def broadcast(inMsg, mainJson):
-    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(inMsg["data"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(str(inMsg["data"]))
     mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
 
 def scheduleAdd(inMsg, mainJson):
