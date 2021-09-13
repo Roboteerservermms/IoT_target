@@ -33,16 +33,16 @@ def TTS(inMsg, mainJson):
     tts = gTTS(text=inMsg["data"], lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
-    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].append(inMsg["GPIO_OUT"])
     mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(fileName)
 
 def rtsp(inMsg, mainJson):
-    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].append(inMsg["GPIO_OUT"])
     mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(inMsg["data"])
 
 def broadcast(inMsg, mainJson):
     mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(inMsg["data"])
-    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].append(inMsg["GPIO_OUT"])
 
 def scheduleAdd(inMsg, mainJson):
     mainJson['schedule'][inMsg["day"]][inMsg["time"]].append(inMsg["data"])
@@ -112,8 +112,8 @@ if __name__ == "__main__":
             inGPIO = gpioQ.get_nowait()
             nowGPIOOUT = mainJson["GPIO"][inGPIO]["OUTPUT"]
             nowGPIOMedia = mainJson["GPIO"][inGPIO]["media"]
-            for v in nowGPIOMedia:
-                videoQ.put(Media(2, v,gpio=nowGPIOOUT))
+            for v, o in nowGPIOMedia,nowGPIOOUT:
+                videoQ.put(Media(2, v,gpio=o))
         except queue.Empty:
             continue
         except KeyError:
