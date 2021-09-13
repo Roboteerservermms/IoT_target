@@ -33,19 +33,22 @@ def TTS(inMsg, mainJson):
     tts = gTTS(text=inMsg["data"], lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
-    mainJson['GPIO'][inMsg["GPIO_IN"]]["OUTPUT"].extend(inMsg["GPIO_OUT"])
-    mainJson['GPIO'][inMsg["GPIO_IN"]]["media"].append(fileName)
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(fileName)
 
 def rtsp(inMsg, mainJson):
-    mainJson['GPIO'][inMsg["GPIO_IN"]]["OUTPUT"].extend(inMsg["GPIO_OUT"])
-    mainJson['GPIO'][inMsg["GPIO_IN"]]["media"].append(inMsg["data"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(inMsg["data"])
 
 def broadcast(inMsg, mainJson):
-    mainJson['GPIO'][inMsg["GPIO_IN"]]["media"].append(inMsg["data"])
-    mainJson['GPIO'][inMsg["GPIO_IN"]]["OUTPUT"].extend(inMsg["GPIO_OUT"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["media"].append(inMsg["data"])
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])]["OUTPUT"].extend(inMsg["GPIO_OUT"])
 
 def scheduleAdd(inMsg, mainJson):
     mainJson['schedule'][inMsg["day"]][inMsg["time"]].append(inMsg["data"])
+
+def rmBroadcast(inMsg, mainJson):
+    mainJson['schedule'][inMsg["day"]][inMsg["time"]]
 
 class MyUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self):
@@ -69,8 +72,9 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
         logger.info(f"The Message is {msgJson}")
         with open("main.json") as f:
             json.dump(mainJson, f)
+        logger.info("Got an UDP Message from {}".format(self.client_address[0]))
         # Send a message from a client
-        socket.sendto(f"{json.dump(mainJson)}",self.client_address)
+        socket.sendto(json.dump(mainJson),self.client_address)
 
 #쓰레드 종료용 시그널 함수
 def sig_handler(signum, frame):
