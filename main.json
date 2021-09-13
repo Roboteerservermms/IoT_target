@@ -1,0 +1,48 @@
+{
+	"schedule" : {
+		"Monday" : null,
+		"Tuesday" : null,
+		"Wednesday" : null,
+		"Thursday" : null,
+		"Friday" : null,
+		"Saturday" : null,
+		"Sunday" : null
+	 },
+	"GPIO" : {
+		"1" : {
+			"OUTPUT" : null,
+			"media" : null
+		},
+		"2" : {
+			"OUTPUT" : null,
+			"media" : null
+		},
+		"3" : {
+			"OUTPUT" : null,
+			"media" : null
+		},
+		"4" : {
+			"OUTPUT" : null,
+			"media" : null
+		},
+		"5" : {
+			"OUTPUT" : null,
+			"media" : null
+		},
+		"6" : {
+			"OUTPUT" : null,
+			"media" : null
+		},
+		"7" : {
+			"OUTPUT" : null,
+			"media" : null
+		},
+		"8" : {
+			"OUTPUT" : null,
+			"media" : null
+		}
+	 },
+	"direct" : {
+
+	}
+}
