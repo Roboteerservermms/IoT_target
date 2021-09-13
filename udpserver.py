@@ -11,7 +11,7 @@ from gpioHandler import GPIOThread
 
 jsonPath = "./json/"
 mainJson = None
-with open('main.json') as json_file:
+with open('./json/main.json') as json_file:
     mainJson = json.load(json_file)
 
 
