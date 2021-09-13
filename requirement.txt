@@ -2,3 +2,5 @@ gTTS
 python-vlc
 pafy
 youtube-dl
+schedule
+apscheduler
