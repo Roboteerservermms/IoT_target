@@ -1,45 +1,45 @@
 {
 	"schedule" : {
-		"Monday" : null,
-		"Tuesday" : null,
-		"Wednesday" : null,
-		"Thursday" : null,
-		"Friday" : null,
-		"Saturday" : null,
-		"Sunday" : null
+		"Monday" : [],
+		"Tuesday" : [],
+		"Wednesday" : [],
+		"Thursday" : [],
+		"Friday" : [],
+		"Saturday" : [],
+		"Sunday" : []
 	 },
 	"GPIO" : {
 		"1" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		},
 		"2" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		},
 		"3" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		},
 		"4" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		},
 		"5" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		},
 		"6" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		},
 		"7" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		},
 		"8" : {
-			"OUTPUT" : null,
-			"media" : null
+			"OUTPUT" : [],
+			"media" : []
 		}
 	 },
 	"direct" : {
