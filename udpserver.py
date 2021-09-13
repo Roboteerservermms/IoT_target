@@ -74,7 +74,8 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
             json.dump(mainJson, f)
         logger.info("Got an UDP Message from {}".format(self.client_address[0]))
         # Send a message from a client
-        socket.sendto(bytes(json.dumps(mainJson),"utf-8"),self.client_address)
+        msg = json.dumps(mainJson)
+        socket.sendto(bytes(msg,"utf-8"),self.client_address)
 
 #쓰레드 종료용 시그널 함수
 def sig_handler(signum, frame):
