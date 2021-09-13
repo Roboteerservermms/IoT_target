@@ -14,6 +14,18 @@ mainJson = None
 with open('main.json') as json_file:
     mainJson = json.load(json_file)
 
+
+import logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+file_handler = logging.FileHandler('server.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
 # define a subclass of UDPServer
 
 def TTS(inMsg, mainJson):
@@ -36,7 +48,7 @@ def scheduleAdd(inMsg, mainJson):
     mainJson['schedule'][inMsg["day"]][inMsg["time"]].append(inMsg["data"])
 
 class MyUDPHandler(socketserver.DatagramRequestHandler):
-    def handle(self, logger):
+    def handle(self):
         # Receive a message from a client
         logger.info("Got an UDP Message from {}".format(self.client_address[0]))
         data = self.request[0].strip()
