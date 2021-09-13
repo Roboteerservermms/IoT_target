@@ -67,10 +67,10 @@ class MyUDPHandler(socketserver.DatagramRequestHandler):
         else:
             broadcast(msgJson,mainJson)
         nowTime = t.strftime("%Y%m%d-%H%M%S")
-        with open(f"{jsonPath}{nowTime}.json") as f:
+        with open(f"{jsonPath}{nowTime}.json","w") as f:
             json.dump(msgJson, f)
         logger.info(f"The Message is {msgJson}")
-        with open("main.json") as f:
+        with open("main.json", "w") as f:
             json.dump(mainJson, f)
         logger.info("Got an UDP Message from {}".format(self.client_address[0]))
         # Send a message from a client
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     gpioT = threading.Thread(target=GPIOThread, args=(exitThread, gpioQ))
     gpioT.start()
     while exitThread:
-        with open('main.json') as json_file:
+        with open('./json/main.json') as json_file:
             mainJson = json.load(json_file)
         nowweekday = t.strftime("%A")
         nowTime = t.strftime("%H:%M")
