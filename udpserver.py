@@ -105,9 +105,9 @@ if __name__ == "__main__":
             for v in nowScheduleMedia:
                 videoQ.put(Media(1,v))
         except KeyError as e:
-            continue
+            pass
         except ValueError as e:
-            continue
+            pass
         try:
             inGPIO = gpioQ.get_nowait()
             nowGPIOOUT = mainJson["GPIO"][inGPIO]["OUTPUT"]

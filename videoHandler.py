@@ -30,8 +30,7 @@ def videoEndHandler(event):
 def videoThread(exitSig, videoQ):
     player = VlcPlayer('--mouse-hide-timeout=0')
     player.add_callback(EventType.MediaPlayerEndReached,videoEndHandler)
-    videoEnd = False
-    media = "blackscreen.mp4"
+    videoEnd = True
     while exitSig:
         if videoEnd:
             try :
@@ -39,6 +38,7 @@ def videoThread(exitSig, videoQ):
             except queue.Empty:
                 media = Media(3, "blackscreen.mp4")
             player.play(media.data)
+            logger.info(f"playing {media.data} pinout {media.gpio}")
             GPIOOUT_FUNC(media.gpio)
             videoEnd = False
         else:
