@@ -82,7 +82,7 @@ def quit_server(client_addr):
 if __name__ == "__main__":
     HOST, PORT, bufferSize = "0.0.0.0", 8080 , 1024
     # 서버를 생성합니다. 호스트는 localhost, 포트 번호는 8080
-    player = VlcPlayer('--mouse-hide-timeout=0')
+    player = VlcPlayer('--mouse-hide-timeout=0 --audio-visual=projectm')
     player.add_callback(EventType.MediaPlayerEndReached,video_end_handler)
     UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPServerSocket.setblocking(0)
