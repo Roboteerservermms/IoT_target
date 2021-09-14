@@ -1,1 +1,23 @@
-{ "schedule" : { "Monday" : [], "Tuesday" : [], "Wensday" : [], "Thursday" : [], "Friday" : [], "Saturday" : [], "Sunday" : [], "Everyday" : [] }, "GPIO" : { "1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[] } }
+{
+	"schedule" : {
+		"Monday" : [],
+		"Tuesday" : [],
+		"Wensday" : [],
+		"Thursday" : [],
+		"Friday" : [],
+		"Saturday" : [],
+		"Sunday" : [],
+		"Everyday" : []
+	},
+	"GPIO" : {
+		"1":[],
+		"2":[],
+		"3":[],
+		"4":[],
+		"5":[],
+		"6":[],
+		"7":[],
+		"8":[]
+	}
+}
+

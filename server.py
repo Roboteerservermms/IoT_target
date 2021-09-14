@@ -33,7 +33,9 @@ out_dic = {111 : [], 112: [], 113 :[] , 114: [], 229: [], 117 : [], 118 : [], 74
 scheduleList = {}
 schedule = sch
 jsonPath = "./json/"
-mainJson = json.loads(f"{jsonPath}main.json")
+mainJson =None
+with open(f'{jsonPath}main.json', 'r') as f:
+    mainJson = json.load(f)
 def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
 
@@ -90,7 +92,8 @@ if __name__ == "__main__":
     mediaQ = PriorityQueue()
     player.play("blackscreen.mp4")
     while exitThread:
-        mainJson = json.loads(f"{jsonPath}main.json")
+        with open(f'{jsonPath}main.json', 'r') as f:
+            mainJson = json.load(f)
         schedule.run_pending()
         if schedule_sig:
             try :
@@ -140,7 +143,7 @@ if __name__ == "__main__":
             with open(f"{jsonPath}{nowTime}.json","w") as f:
                 json.dump(msgJson, f)
             logger.info(f"The Message is {msgJson}")
-            with open('{jsonPath}main.json', "w") as f:
+            with open(f'{jsonPath}main.json', "w") as f:
                 json.dump(mainJson, f)
             # Send a message from a client
             msg = json.dumps(mainJson)
