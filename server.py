@@ -108,24 +108,24 @@ if __name__ == "__main__":
             except KeyError:
                 schedule_sig = False
         else:
-            gpioBoolean = 0
             for i in GPIOIN:
                 in_command = f"cat /sys/class/gpio/gpio{i}/value"
                 if str2bool(subprocess.getoutput(in_command)):
-                    gpioBoolean = 1
                     m = mainJson["GPIO"][str(INPIN[i])]
                     for m in mainJson["GPIO"][str(INPIN[i])]:
                         addMedia = Media(3, mediaData=m["media"], gpio=m["OUTPUT"])
+                        mediaQ.put(addMedia)
+                    break
         if videoEndSig:
             try:
                 currentM = mediaQ.get_nowait()
+                player.play(currentM.data)
+                for index,value in enumerate(currentM.gpio):
+                    out_command = f'echo {value} > /sys/class/gpio/gpio{GPIOOUT[index]}/value'
+                    subprocess.getoutput(out_command)
+                logger.info(f"current status {currentM.data} / {currentM.gpio}")
             except:
-                currentM = "blackscreen.mp4"
-            player.play(currentM.media)
-            for i, loc in currentM.gpio, range(8):
-                out_command = f'echo {i} > /sys/class/gpio/gpio{OUTPIN[loc]}/value'
-                subprocess.getoutput(out_command)
-            logger.info(f"current status {currentM.media} / {currentM.gpio}")
+                pass
         try:
             recvdata, addr = UDPServerSocket.recvfrom(bufferSize)
             data = recvdata.decode("utf-8")
