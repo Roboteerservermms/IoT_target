@@ -82,12 +82,15 @@ def sig_handler(signum, frame):
     global exitThread
     exitThread = True
 
-if __name__ == "__main__":
+def udpThread(exitSig):
     server_IP       = "0.0.0.0"
     server_port     = 8080
     serverAddress   = (server_IP, server_port)
     serverUDP = socketserver.UDPServer(serverAddress, MyUDPHandler)
     serverUDP.serve_forever()
+
+if __name__ == "__main__":
+    udpT = threading.Thread(target=udpThread, args=(exitThread))
     videoQ = queue.PriorityQueue()
     gpioQ = queue.Queue()
     scheduleQ = queue.Queue()

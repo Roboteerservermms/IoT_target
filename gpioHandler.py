@@ -19,16 +19,18 @@ GPIOIN = [111, 112, 113, 114, 229, 117, 118, 75]
 INPIN = { 111 : 1, 112 : 2, 113 : 3, 114 : 4, 229 : 5, 117 : 6, 118 : 7, 75 : 8 }
 OUTPIN = { 1 : 65, 2: 68 , 3 : 70, 4 : 71, 5 : 72, 6 : 73, 7 : 74, 8 : 76 }
 
-async def GPIOOUT_FUNC(outArray):
+def GPIOOUT_FUNC(outArray):
     pinLoc = 1
+    logger.info(f"GPIO OUT {outArray}!")
     for i in outArray:
         outCommand = f"echo {i} > /sys/class/gpio/gpio{OUTPIN[pinLoc]}/value"
         subprocess.getoutput(outCommand)
         pinLoc +=1
 
-async def GPIOThread(exitSig, INQueue):
+def GPIOThread(exitSig, INQueue):
     while exitSig:
         for i in GPIOIN:
             inCommand = f"cat /sys/class/gpio/gpio{i}/value"
             if str2bool(subprocess.getoutput(inCommand)):
+                logger.info(f"GPIO IN {INPIN[i]}!")
                 INQueue.put(INPIN[i])
