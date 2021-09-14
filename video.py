@@ -1,6 +1,15 @@
 import vlc
  
- 
+
+class Media:
+    def __init__(self, orderNumber, mediaData, gpio=[0,0,0,0,0,0,0,0]):
+        self.order = orderNumber
+        self.data = mediaData
+        self.gpio = gpio
+
+    def __lt__(self,other): 
+        return self.order < other.order #객체의 name을 비교한다!
+
 class VlcPlayer:
     '''
     args: VLC인스턴스 생성옵션
