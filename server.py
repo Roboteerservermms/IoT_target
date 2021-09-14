@@ -89,9 +89,10 @@ if __name__ == "__main__":
     UDPServerSocket.bind((HOST,PORT))
     videoEndSig = False
     schedule_sig = False
+    exitThread = False
     mediaQ = PriorityQueue()
     player.play("blackscreen.mp4")
-    while exitThread:
+    while not exitThread:
         with open(f'{jsonPath}main.json', 'r') as f:
             mainJson = json.load(f)
         schedule.run_pending()
