@@ -92,6 +92,7 @@ def udpThread():
 if __name__ == "__main__":
     udpT = threading.Thread(target=udpThread)
     udpT.start()
+    exitThread = False
     videoQ = queue.PriorityQueue()
     gpioQ = queue.Queue()
     scheduleQ = queue.Queue()
