@@ -110,12 +110,14 @@ if __name__ == "__main__":
         else:
             for i in GPIOIN:
                 in_command = f"cat /sys/class/gpio/gpio{i}/value"
-                if str2bool(subprocess.getoutput(in_command)):
-                    m = mainJson["GPIO"][str(INPIN[i])]
-                    for m in mainJson["GPIO"][str(INPIN[i])]:
+                inValue = subprocess.getoutput(in_command)
+                mainJson["GPIOIN"][str(INPIN[i])] = int(inValue)
+                if str2bool(inValue):
+                    m = mainJson["GPIOOUT"][str(INPIN[i])]
+                    for m in mainJson["GPIOOUT"][str(INPIN[i])]:
                         addMedia = Media(3, mediaData=m["media"], gpio=m["OUTPUT"])
                         mediaQ.put(addMedia)
-                    break
+                        break
         if videoEndSig:
             try:
                 currentM = mediaQ.get_nowait()
