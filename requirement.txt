@@ -3,4 +3,6 @@ python-vlc
 pafy
 youtube-dl
 schedule
-apscheduler
+flask
+flask_restx
+pyttsx3
