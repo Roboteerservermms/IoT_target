@@ -1,4 +1,5 @@
 /__pycache__
-.mp3
-/FileStorage
-/json
+*.mp3
+*.log
+json/
+!json/main.json

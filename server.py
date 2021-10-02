@@ -2,12 +2,13 @@ import socket
 import subprocess
 import json
 from gtts import gTTS
-from video import VlcPlayer
+from video import VlcPlayer, Media
 import time as t
 import pafy
 import logging
 from vlc import EventType
 import schedule as sch
+from queue import PriorityQueue
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -21,14 +22,19 @@ logger.addHandler(file_handler)
 
 GPIOOUT = [65, 68, 70, 71, 72, 73, 74, 76]
 GPIOIN = [111, 112, 113, 114, 229, 117, 118, 75]
+INPIN = { 111 : 1, 112 : 2, 113 : 3, 114 : 4, 229 : 5, 117 : 6, 118 : 7, 75 : 8 }
+OUTPIN = { 1 : 65, 2: 68 , 3 : 70, 4 : 71, 5 : 72, 6 : 73, 7 : 74, 8 : 76 }
 host = "0.0.0.0"
 port = 8080
 # 문자열 부울대수로 변화하기
-video_dic = {111 : [], 112: [], 113 :[] , 114: [], 229: [], 117 : [], 118 : [], 74 : [], 75 : [], None: ["blackscreen.mp4"]}
-out_dic = {111 : [], 112: [], 113 :[] , 114: [], 229: [], 117 : [], 118 : [], 74 : [], 75 : [], None: []}
+
+
 scheduleList = {}
 schedule = sch
 jsonPath = "./json/"
+mainJson =None
+with open(f'{jsonPath}main.json', 'r') as f:
+    mainJson = json.load(f)
 def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
 
@@ -37,42 +43,32 @@ def sig_handler(signum, frame):
     global exitThread
     exitThread = True
 
-def TTS(IN, OUT, data):
+
+def TTS(inMsg, mainJson):
     nowTime = t.strftime("%Y%m%d-%H%M%S")
-    tts = gTTS(text=data, lang="ko", slow=False)
+    tts = gTTS(text=inMsg["data"], lang="ko", slow=False)
     fileName=f"{nowTime}.mp3"
     tts.save(fileName)
-    for i in IN:
-        if fileName in video_dic[int(i)]:
-            pass
-        else:
-            video_dic[int(i)].append(fileName)
-        if OUT in out_dic[int(i)]:
-            pass
-        else:
-            out_dic[int(i)].extend(OUT)
+    m = { "OUTPUT" : inMsg["GPIO_OUT"], "media": fileName }
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])].append(m)
 
-def youtube(IN, OUT, data):
-    video = pafy.new(data)
-    best = video.getbest()
-    for i in IN:
-        video_dic[int(i)].append(best.url)
-        out_dic[int(i)].extend(OUT)
+def rtsp(inMsg, mainJson):
+    m = { "OUTPUT" : inMsg["GPIO_OUT"], "media": inMsg["data"] }
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])].append(m)
 
-def rtsp(IN, OUT, data):
-    for i in IN:
-        video_dic[int(i)].append(data)
-        out_dic[int(i)].extend(OUT)
+def broadcast(inMsg, mainJson):
+    m = { "OUTPUT" : inMsg["GPIO_OUT"], "media": inMsg["data"] }
+    mainJson['GPIO'][str(inMsg["GPIO_IN"])].append(m)
 
-def broadcast(IN, OUT, fileName):
-    for i in IN:
-        video_dic[int(i)].append(fileName)
-        out_dic[int(i)].extend(OUT)
+def scheduleAdd(inMsg, mainJson):
+    m = { "time" : inMsg["time"], "media": inMsg["data"] }
+    mainJson['schedule'][inMsg["day"]].append(m)
+
 
 def video_end_handler(event):
     logger.info("video end reached!")
-    global video_sig
-    video_sig = True
+    global videoEndSig
+    videoEndSig = True
 
 def scheduler_sig_handler():
     logger.info("scheduler awake!")
@@ -85,83 +81,76 @@ def quit_server(client_addr):
 if __name__ == "__main__":
     HOST, PORT, bufferSize = "0.0.0.0", 8080 , 1024
     # 서버를 생성합니다. 호스트는 localhost, 포트 번호는 8080
-    player = VlcPlayer('--mouse-hide-timeout=0')
+    player = VlcPlayer('--mouse-hide-timeout=0 --audio-visual=Spectrometer')
     player.add_callback(EventType.MediaPlayerEndReached,video_end_handler)
     UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPServerSocket.setblocking(0)
     UDPServerSocket.bind((HOST,PORT))
-    video_sig = False
+    videoEndSig = False
     schedule_sig = False
-    player.play(video_dic[None][0])
-    while(True):
+    exitThread = False
+    mediaQ = PriorityQueue()
+    player.play("blackscreen.mp4")
+    while not exitThread:
+        with open(f'{jsonPath}main.json', 'r') as f:
+            mainJson = json.load(f)
         schedule.run_pending()
         if schedule_sig:
             try :
+                now_day= t.strftime('%A')
                 now_time = t.strftime('%H:%M')
+                for m in mainJson["schedule"][now_day]:
+                    if m["time"] == now_time:
+                        addMedia = Media(1,mediaData=m["media"])
+                        mediaQ.put(addMedia)
                 logger.info("schedule is running!")
-                player.play(scheduleList[now_time])
             except KeyError:
                 schedule_sig = False
-        elif video_sig:
-            video_sig = False
-            index = None
-            gpioBoolean = 0
+        else:
             for i in GPIOIN:
                 in_command = f"cat /sys/class/gpio/gpio{i}/value"
-                if str2bool(subprocess.getoutput(in_command)):
-                    index = i
-                    gpioBoolean = 1
-                    for o in out_dic[i]:
-                        out_command = f"echo {gpioBoolean} > /sys/class/gpio/gpio{o}/value"
-                        subprocess.getoutput(out_command)
-                else:
-                    gpioBoolean = 0
-                    for o in out_dic[i]:
-                        out_command = f"echo {gpioBoolean} > /sys/class/gpio/gpio{o}/value"
-                        subprocess.getoutput(out_command)
-            for v in video_dic[index]:
-                player.play(v)
-            logger.info(f"in {index} out {out_dic[index]} video {video_dic[index]}")
+                inValue = subprocess.getoutput(in_command)
+                mainJson["GPIOIN"][str(INPIN[i])] = int(inValue)
+                if str2bool(inValue):
+                    m = mainJson["GPIOOUT"][str(INPIN[i])]
+                    for m in mainJson["GPIOOUT"][str(INPIN[i])]:
+                        addMedia = Media(3, mediaData=m["media"], gpio=m["OUTPUT"])
+                        mediaQ.put(addMedia)
+                        break
+        if videoEndSig:
+            try:
+                currentM = mediaQ.get_nowait()
+                player.play(currentM.data)
+                for index,value in enumerate(currentM.gpio):
+                    out_command = f'echo {value} > /sys/class/gpio/gpio{GPIOOUT[index]}/value'
+                    subprocess.getoutput(out_command)
+                logger.info(f"current status {currentM.data} / {currentM.gpio}")
+            except:
+                pass
         try:
-            recvdata, addr = UDPServerSocket.recvfrom(bufferSize) 
+            recvdata, addr = UDPServerSocket.recvfrom(bufferSize)
             data = recvdata.decode("utf-8")
             logger.info(f"{addr} wrote: {data}")
             address = addr
-            command = json.loads(data)
-            if command["category"] == "schedule":
-                try :
-                    day = command["day"]
-                    time = command["time"]
-                    if day == "mon":
-                        schedule.every().monday.at(f"{time}").do(scheduler_sig_handler)
-                    elif day == "tue":
-                        schedule.every().tuesday.at(f"{time}").do(scheduler_sig_handler)
-                    elif day == "wen":
-                        schedule.every().wednesday.at(f"{time}").do(scheduler_sig_handler)
-                    elif day == "thu":
-                        schedule.every().thursday.at(f"{time}").do(scheduler_sig_handler)
-                    elif day == "fri":
-                        schedule.every().friday.at(f"{time}").do(scheduler_sig_handler)
-                    elif day == "sat":
-                        schedule.every().saturday.at(f"{time}").do(scheduler_sig_handler)
-                    elif day == "sun":
-                        schedule.every().sunday.at(f"{time}").do(scheduler_sig_handler)
-                    elif day == "everyday":
-                        schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
-                    else:
-                        schedule.every().day.at(f"{time}").do(scheduler_sig_handler)
-                    scheduleList[time] = command["data"]
-                    print(f"{scheduleList}")
-                except KeyError as e:
-                    scheduleList["00:00"] = data
-            elif command["category"] == "TTS":
-                TTS(command["GPIO_IN"], command["GPIO_OUT"], command["data"])
-            elif command["category"] == "rtsp":
-                rtsp(command["GPIO_IN"], command["GPIO_OUT"], command["data"])
+            msgJson = json.loads(data)
+            if msgJson["category"] == "schedule":
+                scheduleAdd(msgJson,mainJson)
+            elif msgJson["category"] == "TTS":
+                TTS(msgJson,mainJson)
+            elif msgJson["category"] == "rtsp":
+                rtsp(msgJson,mainJson)
             else:
-                broadcast(command["GPIO_IN"], command["GPIO_OUT"], command["data"])
-            logger.info(video_dic)
-            logger.info(out_dic)
+                broadcast(msgJson,mainJson)
+            nowTime = t.strftime("%Y%m%d-%H%M%S")
+            with open(f"{jsonPath}{nowTime}.json","w") as f:
+                json.dump(msgJson, f)
+            logger.info(f"The Message is {msgJson}")
+            with open(f'{jsonPath}main.json', "w") as f:
+                json.dump(mainJson, f)
+            # Send a message from a client
+            msg = json.dumps(mainJson)
+            UDPServerSocket.sendto(bytes(msg,"utf-8"),address)
+            logger.info(mainJson)
         except socket.error:
             pass
         # Ctrl - C 로 종료하기 전까지는 서버는 멈추지 않고 작동
